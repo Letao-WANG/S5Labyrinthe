@@ -18,15 +18,15 @@ public class Controller {
             initGraphWeights(graph);
         }
 
-        drawGraph(listGraph.get(0));
+//        drawGraph(listGraph.get(0));
 //        drawGraph(listGraph.get(1));
-//        drawGraph(listGraph.get(2));
+        drawGraph(listGraph.get(2));
     }
 
     public void drawBoard(Board board, int nlines, int ncols, int pixelSize) {
         JFrame window = new JFrame("Plus court chemin");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setBounds(50, 50, ncols * pixelSize + 20, nlines * pixelSize + 40);
+        window.setBounds(50, 50, ncols * pixelSize + 0, nlines * pixelSize + 70);
         window.getContentPane().add(board);
         window.setVisible(true);
     }
@@ -60,7 +60,6 @@ public class Controller {
             //      (graph.vertexlist.get(v).timeFromSource + heuristic) minimale.
 
             //On l'enl�ve des noeuds � visiter
-            ////////////////////////// TO CHANGE !!!!
             int min_v = start;
             double fmin = Double.POSITIVE_INFINITY;
             for(Vertex v : graph.getVertexlist()){
@@ -79,13 +78,18 @@ public class Controller {
                 if(to_visit.contains(to_try)){
                     double newTimeFromSource = graph.getVertexlist().get(min_v).getTimeFromSource()
                             + graph.getVertexlist().get(min_v).getAdjacencylist().get(i).getWeight();
-
+                    if(newTimeFromSource > 400){
+                        System.out.println("Impossible! ");
+                        continue;
+                    }
                     if (newTimeFromSource < graph.getVertexlist().get(to_try).getTimeFromSource() ) {
                         graph.getVertexlist().get(to_try).setTimeFromSource(newTimeFromSource);
                         graph.getVertexlist().get(to_try).setPrev(graph.getVertexlist().get(min_v));
                     }
                 }
             }
+
+
             //On met � jour l'affichage
             try {
                 board.update(graph, min_v);

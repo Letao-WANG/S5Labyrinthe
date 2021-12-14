@@ -66,6 +66,8 @@ public class Board extends JComponent
                 g2.setPaint(Color.blue);
             if (colors.get((int)type).equals("yellow"))
                 g2.setPaint(Color.yellow);
+            if (colors.get((int)type).equals("darkGray"))
+                g2.setPaint(Color.darkGray);
 
             g2.fill(new Rectangle2D.Double(j*this.pixelSize, i*this.pixelSize, this.pixelSize, this.pixelSize));
 
@@ -77,14 +79,12 @@ public class Board extends JComponent
             if (num_case == this.start)
             {
                 g2.setPaint(Color.white);
-                System.out.println("start");
                 g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/2, i*this.pixelSize+this.pixelSize/2, 20, 20));
 
             }
             if (num_case == this.end)
             {
                 g2.setPaint(Color.black);
-                System.out.println("end");
                 g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/2, i*this.pixelSize+this.pixelSize/2, 20, 20));
             }
 
