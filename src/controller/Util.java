@@ -67,8 +67,8 @@ public class Util {
         }
     }
 
-    public static ArrayList<String> readData() {
-        File file = new File("src/data/info.data");
+    public static ArrayList<String> readData(String fileName) {
+        File file = new File("src/data/"+fileName);
         // read file and transform to Class Java
         ArrayList<String> data = new ArrayList<>();
         try {

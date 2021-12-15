@@ -1,5 +1,6 @@
 package controller;
 
+import model.Edge;
 import model.Graph;
 import model.Vertex;
 import view.Board;
@@ -15,35 +16,45 @@ public class Controller {
     private Boolean flag;
     private int prisonPos;
     private ArrayList<Integer> listFire;
+    private HashSet<Integer> to_visit;
     private LinkedList<Integer> path;
     private ArrayList<Boolean> listOutput;
 
     public Controller() {
-        listGraph = Util.convertDataToGraph(Util.readData());
+        listGraph = Util.convertDataToGraph(Util.readData("myInfo.data"));
         for (Graph graph : listGraph) {
             initGraphWeights(graph);
         }
         path = new LinkedList<>();
+        to_visit = new HashSet<>();
         listOutput = new ArrayList<>();
     }
 
     public void runAllWithGraphic() {
         for (Graph graph : listGraph) {
 //        Graph graph = listGraph.get(1);
+
+            // to visit vertex list
+            for (Vertex v : graph.getVertexlist()) {
+                to_visit.add(v.getNum());
+            }
+            to_visit.remove(graph.getStartV());
+
             drawGraph(graph);
             do {
                 update(graph, true);
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     System.out.println("stop");
                 }
                 if (!flag) {
                     break;
                 }
-            } while (path.get(0) != graph.getEndV());
+            } while (prisonPos != graph.getEndV());
             listOutput.add(flag);
             path.clear();
+            to_visit.clear();
             window.dispose();
         }
         System.out.println(listOutput);
@@ -75,6 +86,7 @@ public class Controller {
 
             for(int fire : listFire){
                 if(fire == prisonPos){
+                    System.out.println("Got fire!");
                     flag = false;
                     break;
                 }
@@ -187,10 +199,7 @@ public class Controller {
     public void prisonerMove(Graph graph, int start, int end, int ncols, Board board, Boolean graphic) {
         graph.getVertexlist().get(start).setTimeFromSource(0);
         //mettre tous les noeuds du graphe dans la liste des noeuds a visiter:
-        HashSet<Integer> to_visit = new HashSet<Integer>();
-        for (Vertex v : graph.getVertexlist()) {
-            to_visit.add(v.getNum());
-        }
+
         // Remplir l'attribut graph.vertexlist.get(v).heuristic pour tous les noeuds v du graphe:
         int lineEnd = end / ncols;
         int colEnd = end % ncols;
@@ -199,9 +208,12 @@ public class Controller {
             int colV = v.getNum() % ncols;
             v.setHeuristic(Util.getEuclideanDistance(lineEnd, lineV, colEnd, colV) * 5);
         }
-
         int min_v = start;
         double fmin = Double.POSITIVE_INFINITY;
+//        ArrayList<Vertex> listAdjacency = new ArrayList<>();
+//        for(Edge edge : graph.getVertexlist().get(min_v).getAdjacencylist()){
+//            listAdjacency.add(graph.getVertexlist().get(edge.getDestination()));
+//        }
         for (Vertex v : graph.getVertexlist()) {
             if (v.getTimeFromSource() + v.getHeuristic() < fmin && to_visit.contains(v.getNum())) {
                 fmin = v.getTimeFromSource() + v.getHeuristic();
@@ -211,7 +223,6 @@ public class Controller {
         to_visit.remove(min_v);
 
         //pour tous ses voisins, on verifie si on est plus rapide en passant par ce noeud.
-        double newDistance = 0;
         for (int i = 0; i < graph.getVertexlist().get(min_v).getAdjacencylist().size(); i++) {
             int to_try = graph.getVertexlist().get(min_v).getAdjacencylist().get(i).getDestination();
             // to_try node timeFromSource += weight
@@ -220,13 +231,11 @@ public class Controller {
                         + graph.getVertexlist().get(min_v).getAdjacencylist().get(i).getWeight();
                 if (newTimeFromSource < graph.getVertexlist().get(to_try).getTimeFromSource()) {
                     graph.getVertexlist().get(to_try).setTimeFromSource(newTimeFromSource);
-                    newDistance = newTimeFromSource;
                     graph.getVertexlist().get(to_try).setPrev(graph.getVertexlist().get(min_v));
                 }
             }
         }
-        if (newDistance > 400) {
-            System.out.println("Impossible");
+        if ( graph.getVertexlist().get(min_v).getTimeFromSource() > 400) {
             flag = false;
         } else {
             path.addFirst(min_v);
