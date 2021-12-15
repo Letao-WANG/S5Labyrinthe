@@ -13,6 +13,8 @@ public class Controller {
     private JFrame window;
 
     private Boolean flag;
+    private int prisonPos;
+    private ArrayList<Integer> listFire;
     private LinkedList<Integer> path;
     private ArrayList<Boolean> listOutput;
 
@@ -25,18 +27,21 @@ public class Controller {
         listOutput = new ArrayList<>();
     }
 
-    public void runAllWithGraphic(){
-        for(Graph graph : listGraph){
+    public void runAllWithGraphic() {
+        for (Graph graph : listGraph) {
+//        Graph graph = listGraph.get(1);
             drawGraph(graph);
-            do{
+            do {
                 update(graph, true);
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
                     System.out.println("stop");
                 }
-                if(!flag) break;
-            }while(path.get(0) != graph.getEndV());
+                if (!flag) {
+                    break;
+                }
+            } while (path.get(0) != graph.getEndV());
             listOutput.add(flag);
             path.clear();
             window.dispose();
@@ -44,26 +49,129 @@ public class Controller {
         System.out.println(listOutput);
     }
 
-    public void runAllWithOutGraphic(){
-        for(Graph graph : listGraph){
-            do{
+    public void runAllWithOutGraphic() {
+        for (Graph graph : listGraph) {
+            do {
                 update(graph, false);
-                if(!flag) break;
-            }while(path.get(0) != graph.getEndV());
+                if (!flag) break;
+            } while (path.get(0) != graph.getEndV());
             listOutput.add(flag);
             path.clear();
         }
         System.out.println(listOutput);
     }
 
-    public void update(Graph graph, Boolean graphic){
+    public void update(Graph graph, Boolean graphic) {
         int ncols = graph.getNcols();
         int nlines = graph.getNlines();
         int startV = graph.getStartV();
         int endV = graph.getEndV();
 
-        prisonerMove(graph, startV, endV, ncols, board, graphic);
+        if(path.size() == 0){
+            prisonerMove(graph, startV, endV, ncols, board, graphic);
+        } else {
+            prisonerMove(graph, startV, endV, ncols, board, graphic);
+            fireMove(graph);
 
+            for(int fire : listFire){
+                if(fire == prisonPos){
+                    flag = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    public void fireMove(Graph graph) {
+        listFire = new ArrayList<>();
+        for (int i = 0; i < graph.getNum_v(); i++) {
+            // if the vertex is fire
+            if (graph.getVertexlist().get(i).getIndivTime() == 500) {
+                listFire.add(i);
+            }
+        }
+
+        ArrayList<Integer> fireDirections = new ArrayList<>();
+        for (Integer fire : listFire) {
+            fireDirections.clear();
+            int ncols = graph.getNcols();
+            int nlines = graph.getNlines();
+            int col = fire % ncols;
+            int line = fire / ncols;
+
+            // top left
+            if (line == 0 && col == 0) {
+                fireDirections.add(fire + 1);
+                fireDirections.add(fire + graph.getNcols());
+            }
+            // top middle
+            else if (line == 0 && col != 0 && col != ncols - 1) {
+                fireDirections.add(fire - 1);
+                fireDirections.add(fire + 1);
+
+                fireDirections.add(fire + graph.getNcols());
+            }
+            // top right
+            else if (line == 0 && col == ncols - 1) {
+                fireDirections.add(fire - 1);
+                fireDirections.add(fire + graph.getNcols());
+            }
+
+            // middle left
+            else if (line != 0 && line != nlines - 1 && col == 0) {
+                fireDirections.add(fire - graph.getNcols());
+                fireDirections.add(fire + graph.getNcols());
+
+                fireDirections.add(fire + 1);
+            }
+
+            // middle middle
+            else if (line != 0 && line != nlines - 1 && col != 0 && col != ncols - 1) {
+                fireDirections.add(fire - graph.getNcols());
+                fireDirections.add(fire + graph.getNcols());
+                fireDirections.add(fire - 1);
+                fireDirections.add(fire + 1);
+            }
+
+            // middle right
+            else if (line != 0 && line != nlines - 1 && col == ncols - 1) {
+                fireDirections.add(fire - graph.getNcols());
+                fireDirections.add(fire + graph.getNcols());
+
+                fireDirections.add(fire - 1);
+            }
+
+            // bottom left
+            else if (line == nlines - 1 && col == 0) {
+                fireDirections.add(fire - graph.getNcols());
+                fireDirections.add(fire + 1);
+            }
+
+            // bottom middle
+            else if (line == nlines - 1 && col != 0 && col != ncols - 1) {
+                fireDirections.add(fire - 1);
+                fireDirections.add(fire + 1);
+
+                fireDirections.add(fire - graph.getNcols());
+            }
+
+            // bottom right
+            else if (line == nlines - 1 && col == ncols - 1) {
+                fireDirections.add(fire - 1);
+                fireDirections.add(fire - graph.getNcols());
+            }
+
+
+            for (int direction : fireDirections) {
+                if(graph.getVertexlist().get(direction).getIndivTime() != 1000)
+                graph.getVertexlist().get(direction).setIndivTime(500);
+            }
+        }
+        for (int direction : fireDirections) {
+            if(graph.getVertexlist().get(direction).getIndivTime() != 1000)
+                listFire.add(direction);
+        }
+        board.repaint();
     }
 
     public void drawBoard(Board board, int nlines, int ncols, int pixelSize) {
@@ -117,15 +225,17 @@ public class Controller {
                 }
             }
         }
-        if(newDistance > 400){
+        if (newDistance > 400) {
+            System.out.println("Impossible");
             flag = false;
         } else {
             path.addFirst(min_v);
-            if(graphic){
+            if (graphic) {
                 board.addPath(graph, path);
             }
             flag = true;
         }
+        prisonPos = min_v;
     }
 
     public void drawGraph(Graph graph) {
