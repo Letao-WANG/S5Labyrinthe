@@ -74,18 +74,18 @@ public class Board extends JComponent
             if (num_case == this.current)
             {
                 g2.setPaint(Color.red);
-                g2.draw(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/2, i*this.pixelSize+this.pixelSize/2, 6, 6));
+                g2.draw(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/4, i*this.pixelSize+this.pixelSize/4, 6, 6));
             }
             if (num_case == this.start)
             {
                 g2.setPaint(Color.white);
-                g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/2, i*this.pixelSize+this.pixelSize/2, 20, 20));
+                g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/4, i*this.pixelSize+this.pixelSize/4, 20, 20));
 
             }
             if (num_case == this.end)
             {
                 g2.setPaint(Color.black);
-                g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/2, i*this.pixelSize+this.pixelSize/2, 20, 20));
+                g2.fill(new Ellipse2D.Double(j*this.pixelSize+this.pixelSize/4, i*this.pixelSize+this.pixelSize/4, 20, 20));
             }
 
             num_case += 1;
