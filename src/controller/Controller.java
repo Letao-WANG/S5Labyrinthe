@@ -46,7 +46,7 @@ public class Controller {
                 if (!flag) {
                     break;
                 }
-                update(graph);
+                update(graph, true);
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -64,11 +64,32 @@ public class Controller {
         saveData();
     }
 
-    public void update(Graph graph) {
+    public void runAllWithOutGraphic() {
+        for (Graph graph : listGraph) {
+            flag = true;
+            theoryPath = AStar(graph);
+            step = 0;
+            do {
+                if (!flag) {
+                    break;
+                }
+                update(graph, false);
+            } while (prisonPos != graph.getEndV());
+            listOutput.add(flag);
+            theoryPath.clear();
+            currentPath.clear();
+            to_visit.clear();
+        }
+
+        printOutput();
+        saveData();
+    }
+
+    public void update(Graph graph, boolean graphic) {
         if(currentPath.size() == 0){
-            prisonerMove(graph, true);
+            prisonerMove(graph, graphic);
         } else {
-            prisonerMove(graph, true);
+            prisonerMove(graph, graphic);
             fireMove(graph);
             for (int fire : listFire) {
                 if (fire == prisonPos) {
@@ -77,7 +98,9 @@ public class Controller {
                 }
             }
         }
-        board.repaint();
+        if(graphic){
+            board.repaint();
+        }
     }
 
     public void fireMove(Graph graph) {
