@@ -1,11 +1,14 @@
 package controller;
 
-import model.Edge;
 import model.Graph;
 import model.Vertex;
 import view.Board;
 
 import javax.swing.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Controller {
@@ -23,7 +26,7 @@ public class Controller {
     private ArrayList<Boolean> listOutput;
 
     public Controller() {
-        listGraph = Util.convertDataToGraph(Util.readData("myInfo.data"));
+        listGraph = Util.convertDataToGraph(Util.readData("info.data"));
         for (Graph graph : listGraph) {
             initGraphWeights(graph);
         }
@@ -56,7 +59,9 @@ public class Controller {
             to_visit.clear();
             window.dispose();
         }
-        System.out.println(listOutput);
+
+        printOutput();
+        saveData();
     }
 
     public void update(Graph graph) {
@@ -67,7 +72,6 @@ public class Controller {
             fireMove(graph);
             for (int fire : listFire) {
                 if (fire == prisonPos) {
-                    System.out.println("Got fire!");
                     flag = false;
                     break;
                 }
@@ -188,44 +192,6 @@ public class Controller {
         step++;
     }
 
-    public void prisonerMove(Graph graph, int start, int end, int ncols, Board board, Boolean graphic) {
-        graph.getVertexlist().get(start).setTimeFromSource(0);
-        //mettre tous les noeuds du graphe dans la liste des noeuds a visiter:
-
-        // Remplir l'attribut graph.vertexlist.get(v).heuristic pour tous les noeuds v du graphe:
-        int lineEnd = end / ncols;
-        int colEnd = end % ncols;
-        for (Vertex v : graph.getVertexlist()) {
-            int lineV = v.getNum() / ncols;
-            int colV = v.getNum() % ncols;
-            v.setHeuristic(Util.getEuclideanDistance(lineEnd, lineV, colEnd, colV));
-        }
-        int min_v = start;
-        double fmin = Double.POSITIVE_INFINITY;
-//        }
-        for (Vertex v : graph.getVertexlist()) {
-            if (v.getTimeFromSource() + v.getHeuristic() < fmin && to_visit.contains(v.getNum())) {
-                fmin = v.getTimeFromSource() + v.getHeuristic();
-                min_v = v.getNum();
-            }
-        }
-        to_visit.remove(min_v);
-
-        //pour tous ses voisins, on verifie si on est plus rapide en passant par ce noeud.
-        for (int i = 0; i < graph.getVertexlist().get(min_v).getAdjacencylist().size(); i++) {
-            int to_try = graph.getVertexlist().get(min_v).getAdjacencylist().get(i).getDestination();
-            // to_try node timeFromSource += weight
-            if (to_visit.contains(to_try)) {
-                double newTimeFromSource = graph.getVertexlist().get(min_v).getTimeFromSource()
-                        + graph.getVertexlist().get(min_v).getAdjacencylist().get(i).getWeight();
-                if (newTimeFromSource < graph.getVertexlist().get(to_try).getTimeFromSource()) {
-                    graph.getVertexlist().get(to_try).setTimeFromSource(newTimeFromSource);
-                    graph.getVertexlist().get(to_try).setPrev(graph.getVertexlist().get(min_v));
-                }
-            }
-        }
-    }
-
     public LinkedList<Integer> AStar(Graph graph) {
         int ncols = graph.getNcols();
         int start = graph.getStartV();
@@ -276,7 +242,7 @@ public class Controller {
                 }
             }
         }
-        LinkedList<Integer> path = new LinkedList<Integer>();
+        LinkedList<Integer> path = new LinkedList<>();
         //remplir la liste path avec le chemin
         Vertex node = graph.getVertexlist().get(end);
         while (node.getNum() != start) {
@@ -334,6 +300,35 @@ public class Controller {
                     }
                 }
             }
+        }
+    }
+
+    public void printOutput(){
+        for (boolean b : listOutput) {
+            char c = (b)?'Y':'N';
+            System.out.println(c);
+        }
+    }
+
+    public void saveData(){
+        try {
+            File file = new File("src/data/out.txt");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            for (boolean b : listOutput) {
+                char c = (b)?'Y':'N';
+                bw.write(c);
+                bw.write('\n');
+            }
+            bw.close();
+            System.out.println("File out.txt has saved.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
