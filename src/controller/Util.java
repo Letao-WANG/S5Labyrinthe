@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Util class for common method
+ */
 public class Util {
     public static ArrayList<Graph> convertDataToGraph(ArrayList<String> data) {
         ArrayList<Graph> listGraph = new ArrayList<>();

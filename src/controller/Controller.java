@@ -11,22 +11,53 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Controller of project, include GUI part (view) and Logic part (model)
+ * Using MVC structure
+ */
 public class Controller {
+    /**
+     * Main graph data
+     */
     private ArrayList<Graph> listGraph;
     private Board board;
     private JFrame window;
 
+    /**
+     * Flag to mark if the prison success
+     */
     private Boolean flag;
+    /**
+     * Position of prison
+     */
     private int prisonPos;
+    /**
+     * List of position of fire
+     */
     private ArrayList<Integer> listFire;
+    /**
+     * Set of vertex that to visit
+     */
     private HashSet<Integer> to_visit;
+    /**
+     * Theory path calculate by AStar algorithm
+     */
     private LinkedList<Integer> theoryPath;
+    /**
+     * Current path that prison is walking
+     */
     private LinkedList<Integer> currentPath;
+    /**
+     * Count of prison step
+     */
     private int step;
+    /**
+     * List of output
+     */
     private ArrayList<Boolean> listOutput;
 
-    public Controller() {
-        listGraph = Util.convertDataToGraph(Util.readData("info.data"));
+    public Controller(String fileName) {
+        listGraph = Util.convertDataToGraph(Util.readData(fileName));
         for (Graph graph : listGraph) {
             initGraphWeights(graph);
         }
@@ -36,6 +67,9 @@ public class Controller {
         listOutput = new ArrayList<>();
     }
 
+    /**
+     * run all cases in the graphic model
+     */
     public void runAllWithGraphic() {
         for (Graph graph : listGraph) {
             drawGraph(graph);
@@ -64,6 +98,9 @@ public class Controller {
         saveData();
     }
 
+    /**
+     * Run all cases in no graphic model
+     */
     public void runAllWithOutGraphic() {
         for (Graph graph : listGraph) {
             flag = true;
@@ -85,6 +122,11 @@ public class Controller {
         saveData();
     }
 
+    /**
+     * Update the position of fire and prison
+     * @param graph current graph
+     * @param graphic if run in the graphic model
+     */
     public void update(Graph graph, boolean graphic) {
         if(currentPath.size() == 0){
             prisonerMove(graph, graphic);
@@ -103,6 +145,10 @@ public class Controller {
         }
     }
 
+    /**
+     * Update the fire position
+     * @param graph
+     */
     public void fireMove(Graph graph) {
         listFire = new ArrayList<>();
         for (int i = 0; i < graph.getNum_v(); i++) {
@@ -194,6 +240,13 @@ public class Controller {
         }
     }
 
+    /**
+     * Create GUI board
+     * @param board board
+     * @param nlines number of lines
+     * @param ncols number of cols
+     * @param pixelSize size
+     */
     public void drawBoard(Board board, int nlines, int ncols, int pixelSize) {
         window = new JFrame("Labyrinthe");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -204,6 +257,11 @@ public class Controller {
         window.setVisible(true);
     }
 
+    /**
+     * Update the prison position
+     * @param graph current graph
+     * @param graphic if run in graphic model
+     */
     public void prisonerMove(Graph graph, boolean graphic) {
         int min_v = theoryPath.get(step);
         currentPath.addFirst(min_v);
@@ -215,6 +273,11 @@ public class Controller {
         step++;
     }
 
+    /**
+     * Algorithm AStar, same as TP8 PartieB, mark variable flag = false if prison is impossible to get out
+     * @param graph current graph
+     * @return list of theory path
+     */
     public LinkedList<Integer> AStar(Graph graph) {
         int ncols = graph.getNcols();
         int start = graph.getStartV();
@@ -268,6 +331,7 @@ public class Controller {
         LinkedList<Integer> path = new LinkedList<>();
         //remplir la liste path avec le chemin
         Vertex node = graph.getVertexlist().get(end);
+        //mark variable flag = false if prison is impossible to get out
         while (node.getNum() != start) {
             if (node.getTimeFromSource() > 400) {
                 flag = false;
@@ -280,6 +344,10 @@ public class Controller {
         return path;
     }
 
+    /**
+     * Set data to create GUI board, using method drawBoard(...)
+     * @param graph current graph
+     */
     public void drawGraph(Graph graph) {
         HashMap<Integer, String> groundColor = new HashMap<>();
         groundColor.put(1, "green");
@@ -303,6 +371,10 @@ public class Controller {
         }
     }
 
+    /**
+     * Set the weights of graphs
+     * @param graph
+     */
     public void initGraphWeights(Graph graph) {
         int nlines = graph.getNlines();
         int ncols = graph.getNcols();
@@ -326,6 +398,9 @@ public class Controller {
         }
     }
 
+    /**
+     * print output in terminal
+     */
     public void printOutput(){
         for (boolean b : listOutput) {
             char c = (b)?'Y':'N';
@@ -333,6 +408,9 @@ public class Controller {
         }
     }
 
+    /**
+     * print output into file
+     */
     public void saveData(){
         try {
             File file = new File("src/data/out.txt");
